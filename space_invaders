@@ -1,0 +1,36 @@
+import turtle 
+
+
+
+
+# Set up the screen
+wn = turtle.Screen()   # import the screen itself
+wn.bgcolor('black') 	# set the background colour of the screen
+wn.title('Space Invaders') 	# set the title for the screen 
+
+### currenty with only these 3 lines the screen goes after the script has finihsed, so we add ad elay to keep it 
+
+# Create a border
+border_pen = turtle.Turtle() # creates a border/pen to hold the game inside, we will now give it some properties
+border_pen.speed(0) 	#fastest speed for drawing border
+border_pen.color('white')
+border_pen.penup() 	# starts the pen that draws the order at bottom left
+border_pen.setposition(-300,-300)  # for 600 x 600 centred at 0,0
+border_pen.pensize(3) 	# give line some thickness
+border_pen.pendown()
+for side in range(4):
+	border_pen.fd(600)
+	border_pen.lt(90)
+border_pen.hideturtle()
+
+
+
+
+# Create player turtle
+player = turtle.Turtle()
+player.color('blue')
+player.shape('triangle')
+player.penup()
+player.speed(0) 
+player.setposition(0,-250)
+player.setheading(90) 	# rotates to point upwards 
