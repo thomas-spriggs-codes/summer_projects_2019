@@ -1,3 +1,6 @@
+###	Takes 3 inputs of 0 or 1 #, outputs a single number, 0 or 1. 
+###	Simple rule for output is that a 1 in first input makes output 1 also
+
 import numpy as np 
 
 def sigmoid(x):
