@@ -2,13 +2,18 @@ import turtle
 import numpy as np
 import random
 import winsound
+import time
 
+zero_time = time.time()
 
 # Set up the screen
 wn = turtle.Screen()   # import the screen itself
 wn.bgcolor('black') 	# set the background colour of the screen
 wn.title('Space Invaders') 	# set the title for the screen 
-wn.bgpic('space_invaders_background.gif')
+wn.bgpic('space_invaders_background.gif') # Give background ## .gif works better than .png
+# Force full screen
+wn.screensize()
+wn.setup(width = 1.0, height = 1.0)
 
 # Register the shapes for player and alien
 turtle.register_shape('invader.gif')
@@ -26,8 +31,9 @@ for side in range(4):
 	border_pen.lt(90)
 border_pen.hideturtle()
 
-# Set the score = 0
+# Set the score = 0, and the number of bollards broke = 0
 score = 0
+broken_bollards = 0
 
 # Darw the score
 score_pen = turtle.Turtle()
@@ -70,22 +76,22 @@ bulletspeed = 20
 # fire - bullet is firing
 bulletstate = 'ready'
 
-## Create bollards that take 5 bullets to destroy
+## Create bollards that blocks bullets
 
-number_of_bollards = 6
-bollards =[]
+number_of_bollards = 5
+bollards = []
 
 for i in range(number_of_bollards):
 	bollards.append(turtle.Turtle())
 
 for bollard in bollards:
 
-	bollard = turtle.Turtle()
 	bollard.speed(0)
 	bollard.color('yellow')
 	bollard.shape('square')
 	bollard.penup()
-	bollard.setposition(-250 + 50*random.randint(1,5),-150)
+	bollard.setposition(-250 + 50*random.randint(1,10),-150)
+	print(bollard.xcor())
 
 
 # Choose number of enemies
@@ -137,7 +143,6 @@ def fire_bullet():
 		bullet.setposition(x,y + 10)
 		bullet.showturtle()
 		
-
 def isCollision(t1,t2):    #do turtle 1 and turle 2 collide
 	'''check for collision between 2 turtles'''
 	distance = np.sqrt( (t1.xcor() - t2.xcor() )**2 + (t1.ycor() - t2.ycor() )**2)
@@ -146,6 +151,7 @@ def isCollision(t1,t2):    #do turtle 1 and turle 2 collide
 
 	else:
 		return False
+
 
 
 # Create keyboard bindings
@@ -164,7 +170,7 @@ while True:     #basically means forever
 		enemy.setx(x)
 
 		# Move back across screen and down
-		if enemy.xcor() > 280:
+		if enemy.xcor() > 280 and enemy.ycor() > -500:   # so it doesnt get affected by shot enemies
 			for e in enemies: #move all the players down when one its the edge
 				# need e now becasue enemy has been used
 				y = e.ycor()
@@ -172,7 +178,7 @@ while True:     #basically means forever
 				e.sety(y)
 			enemyspeed *= -1
 
-		if enemy.xcor() < -280:
+		if enemy.xcor() < -280 and enemy.ycor() > -500:
 			for e in enemies:
 				y = e.ycor()
 				y -= 40
@@ -187,10 +193,12 @@ while True:     #basically means forever
 			bullet.hideturtle()
 			bulletstate = 'ready'
 			bullet.setposition(0,-400) # to make sure it doesnt collisde even when hidden 
-			# Reset the enemy randomly
-			x = random.randint(-200,200)
-			y = random.randint(100,250)
-			enemy.setposition(x,y) 
+			# Delete the enemy by hiding and placing off screen and shotting movement
+			enemy.hideturtle()
+			enemy.setposition(0,-500) 
+
+
+
 			# Update score
 			score +=10 
 			scorestring = 'Score: %s' %score
@@ -198,22 +206,28 @@ while True:     #basically means forever
 			score_pen.write(scorestring, False, align = 'left', font = ('Arial',14, 'normal'))
 
 
-		if isCollision(bullet,bollard):
-			#make noise
-			winsound.PlaySound('explosion',winsound.SND_ASYNC)
-			# reset bullet
-			bullet.hideturtle()
-			bulletstate = 'ready'
-			bullet.setposition(0,-400) # to make sure it doesnt collisde even when hidden 
-			bollard.hideturtle()
-			bollard.setposition(0,400)
 
 
 		if isCollision(player,enemy):
 			player.hideturtle()
 			enemy.hideturtle()
-			print(' Game Over')
+			print('Game Over')
 			break 
+
+	for bollard in bollards:
+		if isCollision(bullet,bollard):
+			print('hit')
+			print(bollard.ycor())
+			#make noise
+			winsound.PlaySound('electronic_stapler',winsound.SND_ASYNC)
+			# reset bullet
+			bullet.hideturtle()
+			bulletstate = 'ready'
+			bullet.setposition(0,-400) # to make sure it doesnt collisde even when hidden 
+			bollard.hideturtle()
+			bollard.setposition(0,-450) # to remove it so it doesnt get hit even when hidden
+			broken_bollards +=1 
+			
 
 	# Move bullet
 	if bulletstate == 'fire':
@@ -226,8 +240,8 @@ while True:     #basically means forever
 		bullet.hideturtle()
 		bulletstate = 'ready'
 
+	if score == number_of_enemies * 10:
+		time = time.time() - zero_time 
+		print(f'Congratulations! You did it in {time:.0f} seconds, but you broke {broken_bollards:.0f} bollard(s) ') 
+		break
 	
-
-
-delay = input('Press enter to finish')
-
